@@ -4,13 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 public class MainFrame extends JFrame {
     //用两个常量来记录空白色块的位置
     private static int row;
     private static int col;
     //定义一个常量来记录步数
-    private static int count;
+    private static int count=0;
 
     //用一个常量来存放图片的路径
     private final String ImagePath = "src/image/";
@@ -135,19 +136,21 @@ public class MainFrame extends JFrame {
     }
 
     private void initRandom() {
-        count=0;
-        for (int i = 0; i < imageData.length; i++) {
-            for (int j = 0; j < imageData[i].length; j++) {
-                //随机获取两行两列的数据，让他们交换
-                int i1 = (int) (Math.random() * imageData.length);
-                int j1 = (int) (Math.random() * imageData.length);
-                int i2 = (int) (Math.random() * imageData.length);
-                int j2 = (int) (Math.random() * imageData.length);
+        count = 0;
+        // 初始化空白色块的位置
+        row = 0;
+        col = 0;
 
-                //让它们交换
-                int temp = imageData[i1][j1];
-                imageData[i1][j1] = imageData[i2][j2];
-                imageData[i2][j2] = temp;
+        // 生成介于200到1000之间的随机数作为打乱次数
+        int shuffleCount = 200 + (int)(Math.random() * 801);
+
+        for (int i = 0; i < shuffleCount; i++) {
+            // 随机选择一个方向进行交换
+            Direction dir = Direction.values()[new Random().nextInt(Direction.values().length)];
+
+            // 尝试交换
+            if (canMove(dir)) {
+                switchAndMove2(dir);
             }
         }
 
@@ -165,6 +168,79 @@ public class MainFrame extends JFrame {
 
     }
 
+    private void switchAndMove2(Direction direction) {
+        //用枚举类来实现
+        switch (direction) {
+            case UP:
+                //向上移动
+                //用空白色块的位置进行上交换
+                if (row < imageData.length - 1) {
+                    //当前空白色块的位置 row col
+                    //要交换色块的位置 row+1 col
+                    int temp = imageData[row + 1][col];
+                    imageData[row + 1][col] = imageData[row][col];
+                    imageData[row][col] = temp;
+                    //更新空白色块的位置
+                    row++;
+                }
+                break;
+            case DOWN:
+                //向下移动
+                if (row > 0) {
+                    //当前空白色块的位置 row col
+                    //要交换色块的位置 row-1 col
+                    int temp = imageData[row - 1][col];
+                    imageData[row - 1][col] = imageData[row][col];
+                    imageData[row][col] = temp;
+                    //更新空白色块的位置
+                    row--;
+                }
+                break;
+            case LEFT:
+                //向左移动
+                if (col < imageData.length - 1) {
+                    //当前空白色块的位置 row col
+                    //要交换色块的位置 row col+1
+                    int temp = imageData[row][col + 1];
+                    imageData[row][col + 1] = imageData[row][col];
+                    imageData[row][col] = temp;
+                    //更新空白色块的位置
+                    col++;
+                }
+                break;
+            case RIGHT:
+                //向右移动
+                if (col > 0) {
+                    //当前空白色块的位置 row col
+                    //要交换色块的位置 row col-1
+                    int temp = imageData[row][col - 1];
+                    imageData[row][col - 1] = imageData[row][col];
+                    imageData[row][col] = temp;
+                    //更新空白色块的位置
+                    col--;
+                }
+                break;
+        }
+        //刷新界面
+        initImage();
+    }
+
+    private boolean canMove(Direction direction) {
+        // 判断空白色块能否向指定的方向移动
+        switch (direction) {
+            case UP:
+                return row < imageData.length - 1;
+            case DOWN:
+                return row > 0;
+            case LEFT:
+                return col < imageData.length - 1;
+            case RIGHT:
+                return col > 0;
+            default:
+                return false;
+        }
+    }
+
     private void initMenu() {
         JMenuBar jMenuBar = new JMenuBar();
         JMenu jMenu = new JMenu("系统");
@@ -178,7 +254,7 @@ public class MainFrame extends JFrame {
         jMenuItem2.addActionListener(e -> {
             initRandom();
             initImage();
-//            count=0;
+            count=0;
         });
         jMenuBar.add(jMenu);
         this.setJMenuBar(jMenuBar);
@@ -242,7 +318,7 @@ public class MainFrame extends JFrame {
 
     private void initFrame() {
         //初始化窗口的大小等一系列信息
-        this.setTitle("石头迷阵 V 1.0 Jane");
+        this.setTitle("石头迷阵 V 2.0 Jane");
         //设置窗口的大小
         this.setSize(465, 580);
         //设置窗口的位置
