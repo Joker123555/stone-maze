@@ -1,6 +1,7 @@
 package com.itheima;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -8,11 +9,20 @@ public class MainFrame extends JFrame {
     //用两个常量来记录空白色块的位置
     private static int row;
     private static int col;
+    //定义一个常量来记录步数
+    private static int count;
 
     //用一个常量来存放图片的路径
     private final String ImagePath = "src/image/";
     //初始化一个二维数组，用来存放石头图片
     private int[][] imageData = new int[][]{
+            {1, 2, 3, 4},
+            {5, 6, 7, 8},
+            {9, 10, 11, 12},
+            {13, 14, 15, 0}
+    };
+    //设计一个成功之后的数组
+    private final int[][] winData = new int[][]{
             {1, 2, 3, 4},
             {5, 6, 7, 8},
             {9, 10, 11, 12},
@@ -63,13 +73,13 @@ public class MainFrame extends JFrame {
     }
 
     //设计一个方法，用来实现图片的交换和移动
-    private void switchAndMove(Direction direction){
+    private void switchAndMove(Direction direction) {
         //用枚举类来实现
-        switch (direction){
+        switch (direction) {
             case UP:
                 //向上移动
                 //用空白色块的位置进行上交换
-                if(row<imageData.length-1){
+                if (row < imageData.length - 1) {
                     //当前空白色块的位置 row col
                     //要交换色块的位置 row+1 col
                     int temp = imageData[row + 1][col];
@@ -77,11 +87,12 @@ public class MainFrame extends JFrame {
                     imageData[row][col] = temp;
                     //更新空白色块的位置
                     row++;
+                    count++;
                 }
                 break;
             case DOWN:
                 //向下移动
-                if(row>0){
+                if (row > 0) {
                     //当前空白色块的位置 row col
                     //要交换色块的位置 row-1 col
                     int temp = imageData[row - 1][col];
@@ -89,11 +100,12 @@ public class MainFrame extends JFrame {
                     imageData[row][col] = temp;
                     //更新空白色块的位置
                     row--;
+                    count++;
                 }
                 break;
             case LEFT:
                 //向左移动
-                if(col<imageData.length-1){
+                if (col < imageData.length - 1) {
                     //当前空白色块的位置 row col
                     //要交换色块的位置 row col+1
                     int temp = imageData[row][col + 1];
@@ -101,11 +113,12 @@ public class MainFrame extends JFrame {
                     imageData[row][col] = temp;
                     //更新空白色块的位置
                     col++;
+                    count++;
                 }
                 break;
             case RIGHT:
                 //向右移动
-                if(col>0){
+                if (col > 0) {
                     //当前空白色块的位置 row col
                     //要交换色块的位置 row col-1
                     int temp = imageData[row][col - 1];
@@ -113,6 +126,7 @@ public class MainFrame extends JFrame {
                     imageData[row][col] = temp;
                     //更新空白色块的位置
                     col--;
+                    count++;
                 }
                 break;
         }
@@ -121,6 +135,7 @@ public class MainFrame extends JFrame {
     }
 
     private void initRandom() {
+        count=0;
         for (int i = 0; i < imageData.length; i++) {
             for (int j = 0; j < imageData[i].length; j++) {
                 //随机获取两行两列的数据，让他们交换
@@ -159,6 +174,12 @@ public class MainFrame extends JFrame {
         //添加退出游戏的事件监听器
         jMenuItem1.addActionListener(e -> System.exit(0));
         jMenu.add(jMenuItem2);
+        //添加重启游戏的事件监听器
+        jMenuItem2.addActionListener(e -> {
+            initRandom();
+            initImage();
+//            count=0;
+        });
         jMenuBar.add(jMenu);
         this.setJMenuBar(jMenuBar);
     }
@@ -166,6 +187,22 @@ public class MainFrame extends JFrame {
     private void initImage() {
         //先清空界面
         this.getContentPane().removeAll();
+        //将记录的步数显示出来
+        JLabel countLabel = new JLabel("当前步数：" + count + "步");
+        countLabel.setBounds(8, 15, 150, 30);
+        this.add(countLabel);
+        //将字体设置为红色
+        countLabel.setForeground(Color.RED);
+        //将字体加粗
+        countLabel.setFont(new Font("微软雅黑", Font.BOLD, 15));
+
+        //判断游戏是否赢，如果赢了就放出胜利的图片
+        if (isWin()) {
+            JLabel winLabel = new JLabel(new ImageIcon(ImagePath + "win.png"));
+            winLabel.setBounds(124, 230, 266, 88);
+            this.add(winLabel);
+        }
+
         //设置用一个二维数组设置石头图片
         for (int i = 0; i < imageData.length; i++) {
             for (int j = 0; j < imageData[i].length; j++) {
@@ -189,6 +226,18 @@ public class MainFrame extends JFrame {
         //再重新刷新新的图层
         this.repaint();
 
+    }
+
+    private boolean isWin() {
+        //判断当前的数组和成功之后的数组是否一致，如果一致，就返回true，否则返回false
+        for (int i = 0; i < imageData.length; i++) {
+            for (int j = 0; j < imageData[i].length; j++) {
+                if (imageData[i][j] != winData[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void initFrame() {
